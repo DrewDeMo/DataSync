@@ -175,14 +175,25 @@ export default function Sites() {
                   </div>
                 )}
 
-                {/* View Button */}
-                <button
-                  onClick={() => handleViewDestination(site)}
-                  className="btn-ghost w-full"
-                >
-                  <Eye className="w-4 h-4 mr-2" weight="bold" />
-                  View Destination
-                </button>
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleViewDestination(site)}
+                    className="btn-ghost w-full"
+                  >
+                    <Eye className="w-4 h-4 mr-2" weight="bold" />
+                    View Destination
+                  </button>
+                  <a
+                    href={`/landing-pages/${site.slug}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary w-full inline-flex items-center justify-center"
+                  >
+                    <Globe className="w-4 h-4 mr-2" weight="bold" />
+                    View Landing Page
+                  </a>
+                </div>
               </div>
             </div>
           ))

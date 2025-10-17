@@ -55,13 +55,28 @@ async function syncSite(jobId: string, site: any) {
 
     await addLog(jobId, 'info', `Sending ${payload.items.length} items to ${site.name}`, site.id, null, { itemCount: payload.items.length });
 
-    const response = await fetch(site.destination_url, {
+    // For landing pages, merge all items into a single content object
+    const landingPageContent = mergeLandingPageContent(payload.items);
+
+    // Generate signature for the landing page content
+    const signature = await generateSignature(landingPageContent, site.destination_secret);
+
+    // Determine campaign type from site slug
+    const campaign = site.slug; // facebook, google, or instagram
+
+    // Send to landing page receiver endpoint
+    const receiverUrl = `${window.location.origin}/api/landing-receiver`;
+
+    const response = await fetch(receiverUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-DSIGN': await generateSignature(payload, site.destination_secret),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        payload: landingPageContent,
+        signature: signature,
+        campaign: campaign,
+      }),
     });
 
     if (!response.ok) {
@@ -127,6 +142,24 @@ async function buildPayload(mappings: any[]) {
     syncedAt: new Date().toISOString(),
     version: '1.0',
   };
+}
+
+/**
+ * Merge multiple content items into a single landing page content object
+ * Takes the first item's data as the base and merges in additional items
+ */
+function mergeLandingPageContent(items: any[]) {
+  if (items.length === 0) {
+    return {};
+  }
+
+  // Start with the first item as the base
+  const merged = { ...items[0].data };
+
+  // For landing pages, we typically want to use the first item's content
+  // but this could be extended to merge multiple items if needed
+
+  return merged;
 }
 
 async function generateSignature(payload: any, secret: string): Promise<string> {

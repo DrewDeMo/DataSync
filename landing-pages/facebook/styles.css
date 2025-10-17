@@ -1,0 +1,238 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #1c1e21;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e4e6eb 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Sync Badge */
+.sync-badge {
+    background: white;
+    border: 2px solid #1877F2;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #1877F2;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sync-icon {
+    font-size: 18px;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #1877F2 0%, #4267B2 100%);
+    color: white;
+    padding: 60px 40px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 20px;
+    margin-bottom: 30px;
+    opacity: 0.95;
+}
+
+.cta-button {
+    display: inline-block;
+    background: white;
+    color: #1877F2;
+    padding: 16px 48px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: #f0f2f5;
+}
+
+/* Offer Section */
+.offer {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border-left: 6px solid #1877F2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.offer-badge {
+    display: inline-block;
+    background: #1877F2;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.offer h2 {
+    font-size: 32px;
+    color: #1877F2;
+    margin-bottom: 16px;
+}
+
+.offer p {
+    font-size: 18px;
+    color: #65676b;
+    margin-bottom: 12px;
+}
+
+.offer-expires {
+    font-size: 14px;
+    color: #8a8d91;
+    font-style: italic;
+}
+
+/* Location Section */
+.location {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.location h2 {
+    font-size: 28px;
+    color: #1877F2;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.location-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.location-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.location-item p {
+    font-size: 16px;
+    color: #1c1e21;
+}
+
+/* Testimonial Section */
+.testimonial {
+    background: linear-gradient(135deg, #4267B2 0%, #1877F2 100%);
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+}
+
+.testimonial-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.testimonial-text {
+    font-size: 24px;
+    color: white;
+    font-style: italic;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.testimonial-author {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #65676b;
+    font-size: 14px;
+}
+
+.footer p {
+    margin-bottom: 8px;
+}
+
+.campaign-source {
+    color: #1877F2;
+    font-weight: 600;
+}
+
+/* Hidden class for optional sections */
+.hidden {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .cta-button {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .offer h2 {
+        font-size: 24px;
+    }
+
+    .location-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonial-text {
+        font-size: 18px;
+    }
+}

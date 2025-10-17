@@ -21,3 +21,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Landing page synced data
+landing-pages/*/data.json

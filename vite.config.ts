@@ -10,4 +10,15 @@ export default defineConfig({
   define: {
     __WS_TOKEN__: JSON.stringify(''),
   },
+  server: {
+    proxy: {
+      // Proxy API requests to the landing receiver endpoint
+      '/api': {
+        target: 'http://localhost:5173',
+        changeOrigin: true,
+      },
+    },
+  },
+  // Serve landing pages as static assets
+  publicDir: 'public',
 });
