@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
   CheckCircle,
@@ -199,18 +200,27 @@ export default function Jobs() {
               </div>
             ) : (
               jobs.map((job, index) => (
-                <button
+                <motion.button
                   key={job.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.2 }}
+                  whileHover={{ backgroundColor: 'rgb(248 250 252)' }}
                   onClick={() => handleSelectJob(job)}
-                  className={`w-full px-6 py-4 hover:bg-slate-50 transition-all text-left group animate-slide-up ${selectedJob?.id === job.id ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''
+                  className={`w-full px-6 py-4 transition-all text-left group ${selectedJob?.id === job.id ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''
                     }`}
-                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
+                      <motion.div
+                        key={`status-${job.status}`}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200 }}
+                        className="flex-shrink-0"
+                      >
                         {getStatusIcon(job.status)}
-                      </div>
+                      </motion.div>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-3">
                           {getStatusBadge(job.status)}
@@ -245,7 +255,7 @@ export default function Jobs() {
                         }`} weight="bold" />
                     </div>
                   </div>
-                </button>
+                </motion.button>
               ))
             )}
           </div>
@@ -285,57 +295,89 @@ export default function Jobs() {
               </div>
             ) : (
               <div className="space-y-3 font-mono text-sm">
-                {liveMode && (
-                  <div className="flex items-center space-x-2 px-3 py-2 bg-indigo-900/50 rounded-lg border border-indigo-700 mb-4">
-                    <Broadcast className="w-4 h-4 text-indigo-400 animate-pulse" weight="bold" />
-                    <span className="text-indigo-300 text-xs font-bold uppercase tracking-wide">Live Streaming</span>
-                  </div>
-                )}
-                {logs.map((log, index) => (
-                  <div
-                    key={log.id}
-                    className="animate-slide-up"
-                    style={{ animationDelay: `${index * 30}ms` }}
-                  >
-                    <div className="flex items-start space-x-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors">
-                      <span className="text-slate-500 shrink-0 text-xs">
-                        {new Date(log.created_at).toLocaleTimeString()}
-                      </span>
-                      <span className={`shrink-0 font-bold text-xs ${log.level === 'error' ? 'text-red-400' :
-                        log.level === 'warn' ? 'text-amber-400' :
-                          'text-blue-400'
+                <AnimatePresence>
+                  {liveMode && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex items-center space-x-2 px-3 py-2 bg-indigo-900/50 rounded-lg border border-indigo-700 mb-4"
+                    >
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                      >
+                        <Broadcast className="w-4 h-4 text-indigo-400" weight="bold" />
+                      </motion.div>
+                      <span className="text-indigo-300 text-xs font-bold uppercase tracking-wide">Live Streaming</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                {logs.map((log, index) => {
+                  const isRetryLog = log.payload?.retryAttempt || log.payload?.attempts > 1;
+                  const retryAttempt = log.payload?.retryAttempt;
+                  const totalAttempts = log.payload?.attempts;
+
+                  return (
+                    <motion.div
+                      key={log.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03, duration: 0.2 }}
+                    >
+                      <div className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${isRetryLog
+                        ? 'bg-amber-900/30 hover:bg-amber-900/40 border border-amber-700/50'
+                        : 'bg-slate-800/50 hover:bg-slate-800'
                         }`}>
-                        [{log.level.toUpperCase()}]
-                      </span>
-                      <span className="flex-1 text-slate-100">{log.message}</span>
-                    </div>
-                    {log.sites && (
-                      <div className="ml-6 mt-1 text-slate-500 text-xs flex items-center space-x-2">
-                        <CaretRight className="w-3 h-3" weight="bold" />
-                        <span>Site: <span className="text-slate-400 font-semibold">{log.sites.name}</span></span>
+                        <span className="text-slate-500 shrink-0 text-xs">
+                          {new Date(log.created_at).toLocaleTimeString()}
+                        </span>
+                        <span className={`shrink-0 font-bold text-xs ${log.level === 'error' ? 'text-red-400' :
+                          log.level === 'warn' ? 'text-amber-400' :
+                            'text-blue-400'
+                          }`}>
+                          [{log.level.toUpperCase()}]
+                        </span>
+                        <span className="flex-1 text-slate-100">{log.message}</span>
+                        {retryAttempt && (
+                          <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-900/50 text-amber-300 border border-amber-700">
+                            Retry {retryAttempt}/3
+                          </span>
+                        )}
+                        {totalAttempts > 1 && !retryAttempt && (
+                          <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-900/50 text-emerald-300 border border-emerald-700">
+                            ✓ After {totalAttempts} attempts
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {log.payload && (
-                      <details className="ml-6 mt-2">
-                        <summary className="text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition-colors">
-                          View payload →
-                        </summary>
-                        <div className="mt-2 space-y-2">
-                          <div className="flex justify-end">
-                            <CopyButton
-                              text={JSON.stringify(log.payload, null, 2)}
-                              label="Copy JSON"
-                              className="text-xs"
-                            />
-                          </div>
-                          <pre className="p-3 bg-slate-950 rounded-lg text-xs text-slate-400 overflow-auto border border-slate-800 max-h-64">
-                            {JSON.stringify(log.payload, null, 2)}
-                          </pre>
+                      {log.sites && (
+                        <div className="ml-6 mt-1 text-slate-500 text-xs flex items-center space-x-2">
+                          <CaretRight className="w-3 h-3" weight="bold" />
+                          <span>Site: <span className="text-slate-400 font-semibold">{log.sites.name}</span></span>
                         </div>
-                      </details>
-                    )}
-                  </div>
-                ))}
+                      )}
+                      {log.payload && (
+                        <details className="ml-6 mt-2">
+                          <summary className="text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition-colors">
+                            View payload →
+                          </summary>
+                          <div className="mt-2 space-y-2">
+                            <div className="flex justify-end">
+                              <CopyButton
+                                text={JSON.stringify(log.payload, null, 2)}
+                                label="Copy JSON"
+                                className="text-xs"
+                              />
+                            </div>
+                            <pre className="p-3 bg-slate-950 rounded-lg text-xs text-slate-400 overflow-auto border border-slate-800 max-h-64">
+                              {JSON.stringify(log.payload, null, 2)}
+                            </pre>
+                          </div>
+                        </details>
+                      )}
+                    </motion.div>
+                  );
+                })}
                 <div ref={logsEndRef} />
               </div>
             )}

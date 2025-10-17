@@ -39,82 +39,112 @@ async function getSitesForSync(organizationId: string) {
 }
 
 async function syncSite(jobId: string, site: any) {
-  try {
-    await addLog(jobId, 'info', `Syncing site: ${site.name}`, site.id);
+  const maxRetries = 3;
+  const retryDelays = [500, 1000, 2000]; // Exponential backoff: 500ms, 1s, 2s
 
-    const mappings = await getSiteMappings(site.id);
-    await addLog(jobId, 'info', `Found ${mappings.length} mappings for ${site.name}`, site.id);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt === 1) {
+        await addLog(jobId, 'info', `Syncing site: ${site.name}`, site.id);
+      } else {
+        await addLog(jobId, 'warn', `Retry attempt ${attempt}/${maxRetries} for ${site.name}`, site.id, null, { retryAttempt: attempt });
+      }
 
-    const payload = await buildPayload(mappings);
+      const mappings = await getSiteMappings(site.id);
 
-    const shouldFail = Math.random() < 0.15;
+      if (attempt === 1) {
+        await addLog(jobId, 'info', `Found ${mappings.length} mappings for ${site.name}`, site.id);
+      }
 
-    if (shouldFail) {
-      await addLog(jobId, 'warn', `Simulated failure for ${site.name}, retrying...`, site.id);
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
+      const payload = await buildPayload(mappings);
 
-    await addLog(jobId, 'info', `Sending ${payload.items.length} items to ${site.name}`, site.id, null, { itemCount: payload.items.length });
+      // Simulate occasional failures for demo purposes (15% chance)
+      const shouldFail = Math.random() < 0.15;
 
-    // For landing pages, merge all items into a single content object
-    const landingPageContent = mergeLandingPageContent(payload.items);
+      if (shouldFail && attempt < maxRetries) {
+        throw new Error('Simulated network error');
+      }
 
-    // Generate signature for the landing page content
-    const signature = await generateSignature(landingPageContent, site.destination_secret);
+      await addLog(jobId, 'info', `Sending ${payload.items.length} items to ${site.name}`, site.id, null, { itemCount: payload.items.length });
 
-    // Determine campaign type from site slug
-    const campaign = site.slug as 'facebook' | 'google' | 'instagram';
+      // For landing pages, merge all items into a single content object
+      const landingPageContent = mergeLandingPageContent(payload.items);
 
-    // Use client-side receiver (for demo purposes)
-    // In production, this would POST to an actual API endpoint
-    const result = await handleLandingPageSync({
-      payload: landingPageContent,
-      signature: signature,
-      campaign: campaign,
-    });
+      // Generate signature for the landing page content
+      const signature = await generateSignature(landingPageContent, site.destination_secret);
 
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to sync to landing page');
-    }
+      // Determine campaign type from site slug
+      const campaign = site.slug as 'facebook' | 'google' | 'instagram';
 
-    // Store snapshot in destination_snapshots table
-    await supabase
-      .from('destination_snapshots')
-      .upsert({
-        site_id: site.id,
+      // Use client-side receiver (for demo purposes)
+      // In production, this would POST to an actual API endpoint
+      const result = await handleLandingPageSync({
         payload: landingPageContent,
-        received_at: new Date().toISOString(),
-        item_count: payload.items.length,
-      }, {
-        onConflict: 'site_id'
+        signature: signature,
+        campaign: campaign,
       });
 
-    await supabase
-      .from('sites')
-      .update({
-        last_sync_status: 'success',
-        last_sync_at: new Date().toISOString(),
-      })
-      .eq('id', site.id);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to sync to landing page');
+      }
 
-    await addLog(jobId, 'info', `Successfully synced to ${site.name}`, site.id, null, {
-      ...result,
-      itemCount: payload.items.length
-    });
+      // Store snapshot in destination_snapshots table
+      await supabase
+        .from('destination_snapshots')
+        .upsert({
+          site_id: site.id,
+          payload: landingPageContent,
+          received_at: new Date().toISOString(),
+          item_count: payload.items.length,
+        }, {
+          onConflict: 'site_id'
+        });
 
-    return { success: true, siteId: site.id };
-  } catch (error: any) {
-    await supabase
-      .from('sites')
-      .update({
-        last_sync_status: 'failed',
-        last_sync_at: new Date().toISOString(),
-      })
-      .eq('id', site.id);
+      await supabase
+        .from('sites')
+        .update({
+          last_sync_status: 'success',
+          last_sync_at: new Date().toISOString(),
+        })
+        .eq('id', site.id);
 
-    await addLog(jobId, 'error', `Failed to sync ${site.name}: ${error.message}`, site.id);
-    return { success: false, siteId: site.id };
+      const successMessage = attempt > 1
+        ? `Successfully synced to ${site.name} after ${attempt} attempts`
+        : `Successfully synced to ${site.name}`;
+
+      await addLog(jobId, 'info', successMessage, site.id, null, {
+        ...result,
+        itemCount: payload.items.length,
+        attempts: attempt
+      });
+
+      return { success: true, siteId: site.id, attempts: attempt };
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxRetries;
+
+      if (isLastAttempt) {
+        // Final failure after all retries
+        await supabase
+          .from('sites')
+          .update({
+            last_sync_status: 'failed',
+            last_sync_at: new Date().toISOString(),
+          })
+          .eq('id', site.id);
+
+        await addLog(jobId, 'error', `Failed to sync ${site.name} after ${maxRetries} attempts: ${error.message}`, site.id, null, { attempts: maxRetries });
+        return { success: false, siteId: site.id, attempts: maxRetries };
+      } else {
+        // Log the failure and wait before retrying
+        const delay = retryDelays[attempt - 1];
+        await addLog(jobId, 'warn', `Attempt ${attempt} failed for ${site.name}: ${error.message}. Retrying in ${delay}ms...`, site.id, null, { retryAttempt: attempt, nextRetryDelay: delay });
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
+
+  // This should never be reached, but TypeScript needs it
+  return { success: false, siteId: site.id, attempts: maxRetries };
 }
 
 async function getSiteMappings(siteId: string) {

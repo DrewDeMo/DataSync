@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
   Globe,
@@ -126,36 +127,61 @@ export default function Sites() {
           </div>
         ) : (
           sites.map((site, index) => (
-            <div
+            <motion.div
               key={site.id}
-              className="group card-hover bg-gradient-to-br from-white to-slate-50 animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.3 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group card-hover bg-gradient-to-br from-white to-slate-50"
             >
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3 flex-1">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg"
+                    >
                       <Globe className="w-6 h-6 text-white" weight="bold" />
-                    </div>
+                    </motion.div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-bold text-slate-900 truncate">{site.name}</h3>
                       <p className="text-sm text-slate-600 font-mono">{site.slug}</p>
                     </div>
                   </div>
-                  {site.last_sync_status && (
-                    <div className="flex-shrink-0">
-                      {getStatusIcon(site.last_sync_status)}
-                    </div>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {site.last_sync_status && (
+                      <motion.div
+                        key={site.last_sync_status}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 180 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                        className="flex-shrink-0"
+                      >
+                        {getStatusIcon(site.last_sync_status)}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {/* Status Badge */}
-                {site.last_sync_status && (
-                  <div className="mb-4">
-                    {getStatusBadge(site.last_sync_status)}
-                  </div>
-                )}
+                <AnimatePresence mode="wait">
+                  {site.last_sync_status && (
+                    <motion.div
+                      key={`badge-${site.last_sync_status}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.2 }}
+                      className="mb-4"
+                    >
+                      {getStatusBadge(site.last_sync_status)}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Destination URL */}
                 <div className="space-y-2 mb-4">
@@ -196,7 +222,7 @@ export default function Sites() {
                   </a>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>
