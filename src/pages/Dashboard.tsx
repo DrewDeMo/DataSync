@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Play, Clock, CheckCircle, XCircle, AlertCircle, Sparkles } from 'lucide-react';
+import {
+  Play,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Warning,
+  Sparkle,
+  FileText,
+  Globe,
+  GitBranch,
+  TrendUp,
+  CircleNotch,
+  Lightning
+} from '@phosphor-icons/react';
 import { getSyncJobs, getSites } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -92,29 +105,29 @@ export default function Dashboard({ onNavigate, onRunSync }: { onNavigate: (page
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-600" weight="bold" />;
       case 'partial':
-        return <AlertCircle className="w-5 h-5 text-amber-600" />;
+        return <Warning className="w-5 h-5 text-amber-600" weight="bold" />;
       case 'failed':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-600" weight="bold" />;
       case 'running':
-        return <Clock className="w-5 h-5 text-blue-600 animate-spin" />;
+        return <CircleNotch className="w-5 h-5 text-indigo-600 animate-spin" weight="bold" />;
       default:
-        return <Clock className="w-5 h-5 text-slate-600" />;
+        return <Clock className="w-5 h-5 text-slate-600" weight="bold" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     const classes = {
-      success: 'bg-green-100 text-green-800',
-      partial: 'bg-amber-100 text-amber-800',
-      failed: 'bg-red-100 text-red-800',
-      running: 'bg-blue-100 text-blue-800',
-      queued: 'bg-slate-100 text-slate-800',
-    }[status] || 'bg-slate-100 text-slate-800';
+      success: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      partial: 'bg-amber-100 text-amber-800 border-amber-200',
+      failed: 'bg-red-100 text-red-800 border-red-200',
+      running: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      queued: 'bg-slate-100 text-slate-800 border-slate-200',
+    }[status] || 'bg-slate-100 text-slate-800 border-slate-200';
 
     return (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${classes}`}>
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${classes}`}>
         {status}
       </span>
     );
@@ -129,126 +142,177 @@ export default function Dashboard({ onNavigate, onRunSync }: { onNavigate: (page
 
   return (
     <div className="space-y-8">
+      {/* Demo Data Banner */}
       {!hasData && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <div className="card bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-6">
           <div className="flex items-start space-x-4">
-            <Sparkles className="w-6 h-6 text-blue-600 mt-1" />
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center">
+                <Sparkle className="w-6 h-6 text-white" weight="bold" />
+              </div>
+            </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">Get Started with Demo Data</h3>
-              <p className="text-blue-800 mb-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Get Started with Demo Data</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                 Load sample content, sites, and mappings to see DataSync in action. This creates an "Acme Holdings" demo with 3 sites, offer banners, and pre-configured mappings.
               </p>
               <button
                 onClick={handleSeedData}
                 disabled={seeding}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50"
+                className="btn-primary"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {seeding ? 'Loading...' : 'Load Demo Data'}
+                <Sparkle className="w-4 h-4 mr-2" weight="bold" />
+                {seeding ? 'Loading Demo Data...' : 'Load Demo Data'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-          <p className="mt-2 text-slate-600">Manage and monitor your content synchronization</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1 tracking-tight">Dashboard</h1>
+          <p className="text-gray-500 text-sm font-normal">Plan, prioritize, and accomplish your tasks with ease.</p>
         </div>
-        <button
-          onClick={handleRunSync}
-          disabled={syncing}
-          className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Play className="w-5 h-5 mr-2" />
-          {syncing ? 'Starting...' : 'Run Sync'}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <button
-          onClick={() => onNavigate('content')}
-          className="bg-white p-6 rounded-xl border-2 border-slate-200 hover:border-blue-500 transition-colors text-left group"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-              <span className="text-2xl group-hover:text-white">📝</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Manage Content</h3>
-          <p className="text-sm text-slate-600">Create and organize content types and items</p>
-        </button>
-
-        <button
-          onClick={() => onNavigate('sites')}
-          className="bg-white p-6 rounded-xl border-2 border-slate-200 hover:border-green-500 transition-colors text-left group"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-600 transition-colors">
-              <span className="text-2xl group-hover:text-white">🌐</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Manage Sites</h3>
-          <p className="text-sm text-slate-600">Configure destination sites and credentials</p>
-        </button>
-
-        <button
-          onClick={() => onNavigate('mappings')}
-          className="bg-white p-6 rounded-xl border-2 border-slate-200 hover:border-purple-500 transition-colors text-left group"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-              <span className="text-2xl group-hover:text-white">🔀</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Configure Mappings</h3>
-          <p className="text-sm text-slate-600">Control which content goes to which sites</p>
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Recent Sync Jobs</h2>
+        <div className="flex gap-3">
+          <button className="btn-secondary">
+            <span className="text-sm font-medium">Import Data</span>
+          </button>
           <button
-            onClick={() => onNavigate('jobs')}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            onClick={handleRunSync}
+            disabled={syncing}
+            className="btn-primary"
           >
-            View All
+            {syncing ? (
+              <>
+                <CircleNotch className="w-4 h-4 mr-2 animate-spin" weight="bold" />
+                <span className="text-sm font-medium">Starting Sync...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-2" weight="fill" />
+                <span className="text-sm font-medium">Run Sync</span>
+              </>
+            )}
           </button>
         </div>
-        <div className="divide-y divide-slate-200">
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        {/* Content Card */}
+        <button
+          onClick={() => onNavigate('content')}
+          className="card hover:shadow-md transition-all text-left p-6 group"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <FileText className="w-6 h-6 text-white" weight="bold" />
+            </div>
+            <TrendUp className="w-5 h-5 text-gray-400" weight="bold" />
+          </div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1 tracking-tight">Manage Content</h3>
+          <p className="text-sm text-gray-500 font-normal leading-relaxed">Create and organize content types and items</p>
+        </button>
+
+        {/* Sites Card */}
+        <button
+          onClick={() => onNavigate('sites')}
+          className="card hover:shadow-md transition-all text-left p-6 group"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <Globe className="w-6 h-6 text-white" weight="bold" />
+            </div>
+            <Lightning className="w-5 h-5 text-gray-400" weight="bold" />
+          </div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1 tracking-tight">Manage Sites</h3>
+          <p className="text-sm text-gray-500 font-normal leading-relaxed">Configure destination sites and credentials</p>
+        </button>
+
+        {/* Mappings Card */}
+        <button
+          onClick={() => onNavigate('mappings')}
+          className="card hover:shadow-md transition-all text-left p-6 group"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+              <GitBranch className="w-6 h-6 text-white" weight="bold" />
+            </div>
+            <CircleNotch className="w-5 h-5 text-gray-400" weight="bold" />
+          </div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1 tracking-tight">Configure Mappings</h3>
+          <p className="text-sm text-gray-500 font-normal leading-relaxed">Control which content goes to which sites</p>
+        </button>
+      </div>
+
+      {/* Recent Sync Jobs */}
+      <div className="card">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Recent Sync Jobs</h2>
+            <button
+              onClick={() => onNavigate('jobs')}
+              className="text-sm text-emerald-700 hover:text-emerald-800 font-medium transition-colors"
+            >
+              View All →
+            </button>
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-100">
           {loading ? (
-            <div className="px-6 py-8 text-center text-slate-600">Loading...</div>
+            <div className="px-6 py-12 text-center">
+              <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-600 text-sm">Loading sync jobs...</p>
+            </div>
           ) : jobs.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <Clock className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-600">No sync jobs yet</p>
-              <p className="text-sm text-slate-500 mt-1">Click "Run Sync" to get started</p>
+            <div className="px-6 py-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-gray-400" weight="bold" />
+              </div>
+              <p className="text-gray-900 font-semibold mb-1 text-sm">No sync jobs yet</p>
+              <p className="text-sm text-gray-500 font-normal">Click "Run Sync" to get started</p>
             </div>
           ) : (
             jobs.map((job) => (
-              <div key={job.id} className="px-6 py-4 hover:bg-slate-50 transition-colors">
+              <div
+                key={job.id}
+                className="px-6 py-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    {getStatusIcon(job.status)}
-                    <div>
-                      <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(job.status)}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
                         {getStatusBadge(job.status)}
                         {job.trigger === 'cron' && (
-                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                            <Clock className="w-3 h-3 mr-1" weight="bold" />
                             auto
                           </span>
                         )}
                       </div>
-                      <div className="text-sm text-slate-600 mt-1">
-                        {new Date(job.created_at).toLocaleString()}
+                      <div className="text-sm text-gray-600 font-normal">
+                        {new Date(job.created_at).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </div>
                     </div>
                   </div>
                   {formatDuration(job.started_at, job.completed_at) && (
-                    <div className="text-sm text-slate-500">
-                      {formatDuration(job.started_at, job.completed_at)}
+                    <div className="flex items-center space-x-2 text-sm">
+                      <Lightning className="w-4 h-4 text-gray-400" weight="bold" />
+                      <span className="font-semibold text-gray-700">
+                        {formatDuration(job.started_at, job.completed_at)}
+                      </span>
                     </div>
                   )}
                 </div>

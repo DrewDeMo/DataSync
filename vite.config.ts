@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ['@phosphor-icons/react'],
   },
   define: {
     __WS_TOKEN__: JSON.stringify(''),

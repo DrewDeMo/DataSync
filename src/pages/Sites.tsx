@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Plus, Globe, Eye, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import {
+  Plus,
+  Globe,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Warning,
+  ArrowsClockwise,
+  X,
+  Link,
+  Shield
+} from '@phosphor-icons/react';
 import { getSites, createSite, getDestinationSnapshot, generateSecret } from '../lib/api';
 
 type Site = {
@@ -57,69 +68,122 @@ export default function Sites() {
     if (!status) return null;
     switch (status) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-600" weight="bold" />;
       case 'partial':
-        return <AlertCircle className="w-5 h-5 text-amber-600" />;
+        return <Warning className="w-5 h-5 text-amber-600" weight="bold" />;
       case 'failed':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-600" weight="bold" />;
     }
+  };
+
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return null;
+    const classes = {
+      success: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      partial: 'bg-amber-100 text-amber-800 border-amber-200',
+      failed: 'bg-red-100 text-red-800 border-red-200',
+    }[status] || 'bg-slate-100 text-slate-800 border-slate-200';
+
+    return (
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${classes}`}>
+        {status}
+      </span>
+    );
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Sites</h1>
-          <p className="mt-2 text-slate-600">Manage destination sites and credentials</p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold text-gradient-primary">Sites</h1>
+          <p className="text-slate-600 text-lg">Manage destination sites and credentials</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+          className="btn-primary group"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" weight="bold" />
           New Site
         </button>
       </div>
 
+      {/* Sites Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full text-center py-12 text-slate-600">Loading...</div>
+          <div className="col-span-full text-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-600">Loading sites...</p>
+          </div>
         ) : sites.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <Globe className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-            <p className="text-slate-600">No sites yet</p>
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Globe className="w-8 h-8 text-slate-400" weight="bold" />
+            </div>
+            <p className="text-slate-900 font-semibold mb-1">No sites yet</p>
+            <p className="text-sm text-slate-500">Create your first site to get started</p>
           </div>
         ) : (
-          sites.map((site) => (
-            <div key={site.id} className="bg-white rounded-xl border border-slate-200 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900">{site.name}</h3>
-                  <p className="text-sm text-slate-600 mt-1">{site.slug}</p>
+          sites.map((site, index) => (
+            <div
+              key={site.id}
+              className="group card-hover bg-gradient-to-br from-white to-slate-50 animate-slide-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3 flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Globe className="w-6 h-6 text-white" weight="bold" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-slate-900 truncate">{site.name}</h3>
+                      <p className="text-sm text-slate-600 font-mono">{site.slug}</p>
+                    </div>
+                  </div>
+                  {site.last_sync_status && (
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(site.last_sync_status)}
+                    </div>
+                  )}
                 </div>
-                {site.last_sync_status && getStatusIcon(site.last_sync_status)}
+
+                {/* Status Badge */}
+                {site.last_sync_status && (
+                  <div className="mb-4">
+                    {getStatusBadge(site.last_sync_status)}
+                  </div>
+                )}
+
+                {/* Destination URL */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center space-x-2 text-xs text-slate-500 uppercase tracking-wide font-semibold">
+                    <Link className="w-3 h-3" weight="bold" />
+                    <span>Destination URL</span>
+                  </div>
+                  <div className="text-sm text-slate-700 font-mono bg-slate-100 px-3 py-2 rounded-lg break-all border border-slate-200">
+                    {site.destination_url}
+                  </div>
+                </div>
+
+                {/* Last Sync */}
+                {site.last_sync_at && (
+                  <div className="flex items-center space-x-2 text-xs text-slate-500 mb-4">
+                    <ArrowsClockwise className="w-3 h-3" weight="bold" />
+                    <span>Last sync: {new Date(site.last_sync_at).toLocaleString()}</span>
+                  </div>
+                )}
+
+                {/* View Button */}
+                <button
+                  onClick={() => handleViewDestination(site)}
+                  className="btn-ghost w-full"
+                >
+                  <Eye className="w-4 h-4 mr-2" weight="bold" />
+                  View Destination
+                </button>
               </div>
-
-              <div className="space-y-2 mb-4">
-                <div className="text-xs text-slate-500 uppercase tracking-wide">Destination URL</div>
-                <div className="text-sm text-slate-700 font-mono bg-slate-50 px-3 py-2 rounded break-all">
-                  {site.destination_url}
-                </div>
-              </div>
-
-              {site.last_sync_at && (
-                <div className="text-xs text-slate-500 mb-4">
-                  Last sync: {new Date(site.last_sync_at).toLocaleString()}
-                </div>
-              )}
-
-              <button
-                onClick={() => handleViewDestination(site)}
-                className="w-full inline-flex items-center justify-center px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View Destination
-              </button>
             </div>
           ))
         )}
@@ -174,71 +238,79 @@ function CreateSiteModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Create Site</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-scale-in">
+      <div className="card max-w-md w-full shadow-2xl">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Globe className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Create Site</h3>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Site Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="North"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., North Region, Europe Site"
+              className="input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Destination URL <span className="text-slate-500">(optional, auto-generated)</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Destination URL <span className="text-slate-500 font-normal">(optional, auto-generated)</span>
             </label>
             <input
               type="text"
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="Leave empty for mock endpoint"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Secret</label>
+            <label className="flex items-center space-x-2 text-sm font-semibold text-slate-700 mb-2">
+              <Shield className="w-4 h-4" weight="bold" />
+              <span>Secret Key</span>
+            </label>
             <div className="flex space-x-2">
               <input
                 type="text"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
                 required
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                className="input flex-1 font-mono text-sm"
               />
               <button
                 type="button"
                 onClick={generateNewSecret}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                className="btn-secondary"
               >
-                Regenerate
+                <ArrowsClockwise className="w-4 h-4" weight="bold" />
               </button>
             </div>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              className="btn-secondary flex-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="btn-primary flex-1"
             >
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? 'Creating...' : 'Create Site'}
             </button>
           </div>
         </form>
@@ -251,69 +323,92 @@ function DestinationViewer({ site, snapshot, onClose }: { site: Site; snapshot: 
   const [tab, setTab] = useState<'preview' | 'json'>('preview');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">Destination: {site.name}</h3>
-            <p className="text-sm text-slate-600 mt-1">{site.slug}</p>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-scale-in">
+      <div className="card max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Globe className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900">Destination: {site.name}</h3>
+              <p className="text-sm text-slate-600 font-mono">{site.slug}</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
-            ✕
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+          >
+            <X className="w-5 h-5" weight="bold" />
           </button>
         </div>
 
-        <div className="border-b border-slate-200">
-          <div className="flex space-x-4 px-6">
+        {/* Tabs */}
+        <div className="border-b border-slate-200 bg-slate-50">
+          <div className="flex space-x-1 px-6">
             <button
               onClick={() => setTab('preview')}
-              className={`py-3 border-b-2 transition-colors ${
-                tab === 'preview'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative px-4 py-3 font-semibold text-sm transition-all ${tab === 'preview'
+                ? 'text-indigo-600'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Preview
+              {tab === 'preview' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+              )}
             </button>
             <button
               onClick={() => setTab('json')}
-              className={`py-3 border-b-2 transition-colors ${
-                tab === 'json'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`relative px-4 py-3 font-semibold text-sm transition-all ${tab === 'json'
+                ? 'text-indigo-600'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               JSON
+              {tab === 'json' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"></div>
+              )}
             </button>
           </div>
         </div>
 
-        <div className="p-6 overflow-auto max-h-[calc(80vh-160px)]">
+        {/* Content */}
+        <div className="p-6 overflow-auto max-h-[calc(80vh-160px)] scrollbar-thin">
           {!snapshot ? (
             <div className="text-center py-12">
-              <Globe className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-600">No data received yet</p>
-              <p className="text-sm text-slate-500 mt-1">Run a sync to see results</p>
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Globe className="w-8 h-8 text-slate-400" weight="bold" />
+              </div>
+              <p className="text-slate-900 font-semibold mb-1">No data received yet</p>
+              <p className="text-sm text-slate-500">Run a sync to see results</p>
             </div>
           ) : tab === 'preview' ? (
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="text-sm text-blue-900">
-                  <strong>Received:</strong> {new Date(snapshot.received_at).toLocaleString()}
-                </div>
-                <div className="text-sm text-blue-900 mt-1">
-                  <strong>Items:</strong> {snapshot.item_count}
+              {/* Info Card */}
+              <div className="card bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200/50 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="text-sm font-semibold text-indigo-900">
+                      Received: {new Date(snapshot.received_at).toLocaleString()}
+                    </div>
+                    <div className="text-sm font-semibold text-indigo-900">
+                      Items: {snapshot.item_count}
+                    </div>
+                  </div>
+                  <CheckCircle className="w-8 h-8 text-indigo-600" weight="bold" />
                 </div>
               </div>
 
+              {/* Items */}
               {snapshot.payload.items?.map((item: any, idx: number) => (
-                <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-slate-900 mb-2">{item.title || `Item ${idx + 1}`}</h4>
-                  <div className="space-y-1">
+                <div key={idx} className="card-hover p-4">
+                  <h4 className="font-bold text-slate-900 text-lg mb-3">{item.title || `Item ${idx + 1}`}</h4>
+                  <div className="space-y-2">
                     {Object.entries(item.data || {}).map(([key, value]) => (
-                      <div key={key} className="text-sm">
-                        <span className="text-slate-600">{key}:</span>{' '}
-                        <span className="text-slate-900">{String(value)}</span>
+                      <div key={key} className="flex items-start space-x-3 text-sm">
+                        <span className="font-semibold text-slate-600 min-w-[100px]">{key}:</span>
+                        <span className="text-slate-900 flex-1">{String(value)}</span>
                       </div>
                     ))}
                   </div>
@@ -321,7 +416,7 @@ function DestinationViewer({ site, snapshot, onClose }: { site: Site; snapshot: 
               ))}
             </div>
           ) : (
-            <pre className="bg-slate-50 p-4 rounded-lg text-sm overflow-auto">
+            <pre className="bg-slate-900 text-slate-100 p-6 rounded-xl text-sm overflow-auto font-mono shadow-inner">
               {JSON.stringify(snapshot.payload, null, 2)}
             </pre>
           )}

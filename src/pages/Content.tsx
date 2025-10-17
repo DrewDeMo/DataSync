@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Eye } from 'lucide-react';
+import {
+  Plus,
+  FileText,
+  Eye,
+  X,
+  Stack,
+  Code
+} from '@phosphor-icons/react';
 import { getContentTypes, getContentItems, createContentType, createContentItem, updateContentItem } from '../lib/api';
 
 type ContentType = {
@@ -47,13 +54,13 @@ export default function Content() {
 
   const getStatusBadge = (status: string) => {
     const classes = {
-      published: 'bg-green-100 text-green-800',
-      draft: 'bg-amber-100 text-amber-800',
-      archived: 'bg-slate-100 text-slate-800',
-    }[status] || 'bg-slate-100 text-slate-800';
+      published: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      draft: 'bg-amber-100 text-amber-800 border-amber-200',
+      archived: 'bg-slate-100 text-slate-800 border-slate-200',
+    }[status] || 'bg-slate-100 text-slate-800 border-slate-200';
 
     return (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${classes}`}>
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${classes}`}>
         {status}
       </span>
     );
@@ -65,48 +72,72 @@ export default function Content() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Content</h1>
-          <p className="mt-2 text-slate-600">Manage content types and items</p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold text-gradient-primary">Content</h1>
+          <p className="text-slate-600 text-lg">Manage content types and items</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setShowTypeModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors"
+            className="btn-secondary group"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Stack className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" weight="bold" />
             New Type
           </button>
           <button
             onClick={() => setShowItemModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            className="btn-primary group"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" weight="bold" />
             New Item
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">Content Types</h2>
+      {/* Content Types Section */}
+      <div className="card overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Stack className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">Content Types</h2>
+          </div>
         </div>
-        <div className="divide-y divide-slate-200">
+        <div className="divide-y divide-slate-100">
           {types.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-600">No content types yet</p>
+            <div className="px-6 py-12 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Stack className="w-8 h-8 text-slate-400" weight="bold" />
+              </div>
+              <p className="text-slate-900 font-semibold mb-1">No content types yet</p>
+              <p className="text-sm text-slate-500">Create your first content type to get started</p>
             </div>
           ) : (
-            types.map((type) => (
-              <div key={type.id} className="px-6 py-4 hover:bg-slate-50 transition-colors">
+            types.map((type, index) => (
+              <div
+                key={type.id}
+                className="px-6 py-4 hover:bg-slate-50 transition-all duration-200 group animate-slide-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-slate-900">{type.name}</h3>
-                    <p className="text-sm text-slate-600">{type.schema.length} fields</p>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <FileText className="w-6 h-6 text-blue-600" weight="bold" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-lg">{type.name}</h3>
+                      <p className="text-sm text-slate-600 mt-0.5">
+                        <Code className="w-3 h-3 inline mr-1" weight="bold" />
+                        {type.schema.length} fields
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-sm text-slate-500">{type.slug}</span>
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-sm font-mono font-semibold">
+                    {type.slug}
+                  </span>
                 </div>
               </div>
             ))
@@ -114,36 +145,57 @@ export default function Content() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">Content Items</h2>
+      {/* Content Items Section */}
+      <div className="card overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FileText className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">Content Items</h2>
+          </div>
         </div>
-        <div className="divide-y divide-slate-200">
+        <div className="divide-y divide-slate-100">
           {loading ? (
-            <div className="px-6 py-8 text-center text-slate-600">Loading...</div>
+            <div className="px-6 py-12 text-center">
+              <div className="inline-block w-8 h-8 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+              <p className="text-slate-600">Loading content items...</p>
+            </div>
           ) : items.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-              <p className="text-slate-600">No content items yet</p>
+            <div className="px-6 py-12 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-8 h-8 text-slate-400" weight="bold" />
+              </div>
+              <p className="text-slate-900 font-semibold mb-1">No content items yet</p>
+              <p className="text-sm text-slate-500">Create your first content item to get started</p>
             </div>
           ) : (
-            items.map((item) => (
-              <div key={item.id} className="px-6 py-4 hover:bg-slate-50 transition-colors">
+            items.map((item, index) => (
+              <div
+                key={item.id}
+                className="px-6 py-4 hover:bg-slate-50 transition-all duration-200 group animate-slide-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
                 <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="font-medium text-slate-900">{item.title}</h3>
-                      {getStatusBadge(item.status)}
+                  <div className="flex-1 flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <FileText className="w-6 h-6 text-purple-600" weight="bold" />
                     </div>
-                    <p className="text-sm text-slate-600 mt-1">
-                      {item.content_types?.name}
-                    </p>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-1">
+                        <h3 className="font-bold text-slate-900 text-lg">{item.title}</h3>
+                        {getStatusBadge(item.status)}
+                      </div>
+                      <p className="text-sm text-slate-600">
+                        {item.content_types?.name}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleViewItem(item)}
-                    className="inline-flex items-center px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="btn-ghost"
                   >
-                    <Eye className="w-4 h-4 mr-2" />
+                    <Eye className="w-4 h-4 mr-2" weight="bold" />
                     View
                   </button>
                 </div>
@@ -170,16 +222,24 @@ export default function Content() {
 
 function ItemViewer({ item, onClose }: { item: ContentItem; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-700">
-            ✕
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-scale-in">
+      <div className="card max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Eye className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+          >
+            <X className="w-5 h-5" weight="bold" />
           </button>
         </div>
-        <div className="p-6 overflow-auto max-h-[calc(80vh-80px)]">
-          <pre className="bg-slate-50 p-4 rounded-lg text-sm overflow-auto">
+        <div className="p-6 overflow-auto max-h-[calc(80vh-80px)] scrollbar-thin">
+          <pre className="bg-slate-900 text-slate-100 p-6 rounded-xl text-sm overflow-auto font-mono shadow-inner">
             {JSON.stringify(item.data, null, 2)}
           </pre>
         </div>
@@ -209,36 +269,42 @@ function CreateTypeModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Create Content Type</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-scale-in">
+      <div className="card max-w-md w-full shadow-2xl">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Stack className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Create Content Type</h3>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Type Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="e.g., Blog Post, Product, Event"
             />
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              className="btn-secondary flex-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="btn-primary flex-1"
             >
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? 'Creating...' : 'Create Type'}
             </button>
           </div>
         </form>
@@ -272,21 +338,26 @@ function CreateItemModal({ types, onClose, onSuccess }: { types: ContentType[]; 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full">
-        <div className="px-6 py-4 border-b border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-900">Create Content Item</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-scale-in">
+      <div className="card max-w-md w-full shadow-2xl">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Plus className="w-5 h-5 text-white" weight="bold" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">Create Content Item</h3>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Content Type</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Content Type</label>
             <select
               value={typeId}
               onChange={(e) => setTypeId(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
             >
-              <option value="">Select type</option>
+              <option value="">Select a content type</option>
               {types.map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.name}
@@ -295,49 +366,51 @@ function CreateItemModal({ types, onClose, onSuccess }: { types: ContentType[]; 
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
+              placeholder="Enter item title"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Data (JSON)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Data (JSON)</label>
             <textarea
               value={data}
               onChange={(e) => setData(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+              rows={6}
+              className="input font-mono text-sm"
+              placeholder='{"key": "value"}'
             />
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              className="btn-secondary flex-1"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="btn-primary flex-1"
             >
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? 'Creating...' : 'Create Item'}
             </button>
           </div>
         </form>
