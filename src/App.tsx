@@ -10,6 +10,7 @@ import Mappings from './pages/Mappings';
 import Jobs from './pages/Jobs';
 import { executeSyncJob } from './lib/syncEngine';
 import { handleDestinationRequest } from './lib/mockDestination';
+import { supabase } from './lib/supabase';
 import { Sparkle } from '@phosphor-icons/react';
 
 function App() {
@@ -41,11 +42,27 @@ function AppContent() {
   const handleRunSync = async () => {
     if (!profile) return;
 
-    const jobs = await fetch('/api/sync-jobs').then(r => r.json());
-    const latestJob = jobs[0];
+    try {
+      // Fetch sync jobs from Supabase
+      const { data: jobs, error } = await supabase
+        .from('sync_jobs')
+        .select('*')
+        .eq('organization_id', profile.organization_id)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    if (latestJob) {
-      executeSyncJob(latestJob.id, profile.organization_id);
+      if (error) {
+        console.error('Error fetching sync jobs:', error);
+        return;
+      }
+
+      const latestJob = jobs?.[0];
+
+      if (latestJob) {
+        executeSyncJob(latestJob.id, profile.organization_id);
+      }
+    } catch (error) {
+      console.error('Error running sync:', error);
     }
   };
 

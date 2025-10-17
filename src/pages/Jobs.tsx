@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Clock,
   CheckCircle,
@@ -7,9 +7,11 @@ import {
   CaretRight,
   CircleNotch,
   Lightning,
-  Terminal
+  Terminal,
+  Broadcast
 } from '@phosphor-icons/react';
-import { getSyncJobs, getSyncJob, getJobLogs } from '../lib/api';
+import { getSyncJobs, getSyncJob, getJobLogs, subscribeToJobLogs } from '../lib/api';
+import CopyButton from '../components/CopyButton';
 
 type SyncJob = {
   id: string;
@@ -38,10 +40,30 @@ export default function Jobs() {
   const [logs, setLogs] = useState<JobLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [liveMode, setLiveMode] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     loadJobs();
   }, []);
+
+  // Auto-scroll to bottom when new logs arrive in live mode
+  useEffect(() => {
+    if (liveMode && logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, liveMode]);
+
+  // Cleanup subscription on unmount or job change
+  useEffect(() => {
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
+  }, [selectedJob]);
 
   const loadJobs = async () => {
     try {
@@ -55,11 +77,33 @@ export default function Jobs() {
   };
 
   const handleSelectJob = async (job: SyncJob) => {
+    // Cleanup previous subscription
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+
     setSelectedJob(job);
     setLogsLoading(true);
+    setLiveMode(job.status === 'running');
+
     try {
       const logsData = await getJobLogs(job.id);
       setLogs(logsData);
+
+      // Subscribe to live logs if job is running
+      if (job.status === 'running') {
+        unsubscribeRef.current = subscribeToJobLogs(
+          job.id,
+          (newLog) => {
+            setLogs((prevLogs) => [...prevLogs, newLog]);
+          },
+          (error) => {
+            console.error('Live log subscription error:', error);
+            setLiveMode(false);
+          }
+        );
+      }
     } catch (error) {
       console.error('Error loading logs:', error);
     } finally {
@@ -241,6 +285,12 @@ export default function Jobs() {
               </div>
             ) : (
               <div className="space-y-3 font-mono text-sm">
+                {liveMode && (
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-indigo-900/50 rounded-lg border border-indigo-700 mb-4">
+                    <Broadcast className="w-4 h-4 text-indigo-400 animate-pulse" weight="bold" />
+                    <span className="text-indigo-300 text-xs font-bold uppercase tracking-wide">Live Streaming</span>
+                  </div>
+                )}
                 {logs.map((log, index) => (
                   <div
                     key={log.id}
@@ -270,13 +320,23 @@ export default function Jobs() {
                         <summary className="text-slate-500 text-xs cursor-pointer hover:text-slate-400 transition-colors">
                           View payload →
                         </summary>
-                        <pre className="mt-2 p-3 bg-slate-950 rounded-lg text-xs text-slate-400 overflow-auto border border-slate-800">
-                          {JSON.stringify(log.payload, null, 2)}
-                        </pre>
+                        <div className="mt-2 space-y-2">
+                          <div className="flex justify-end">
+                            <CopyButton
+                              text={JSON.stringify(log.payload, null, 2)}
+                              label="Copy JSON"
+                              className="text-xs"
+                            />
+                          </div>
+                          <pre className="p-3 bg-slate-950 rounded-lg text-xs text-slate-400 overflow-auto border border-slate-800 max-h-64">
+                            {JSON.stringify(log.payload, null, 2)}
+                          </pre>
+                        </div>
                       </details>
                     )}
                   </div>
                 ))}
+                <div ref={logsEndRef} />
               </div>
             )}
           </div>

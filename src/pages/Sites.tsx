@@ -12,6 +12,7 @@ import {
   Shield
 } from '@phosphor-icons/react';
 import { getSites, createSite, getDestinationSnapshot, generateSecret } from '../lib/api';
+import CopyButton from '../components/CopyButton';
 
 type Site = {
   id: string;
@@ -427,9 +428,17 @@ function DestinationViewer({ site, snapshot, onClose }: { site: Site; snapshot: 
               ))}
             </div>
           ) : (
-            <pre className="bg-slate-900 text-slate-100 p-6 rounded-xl text-sm overflow-auto font-mono shadow-inner">
-              {JSON.stringify(snapshot.payload, null, 2)}
-            </pre>
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                <CopyButton
+                  text={JSON.stringify(snapshot.payload, null, 2)}
+                  label="Copy JSON"
+                />
+              </div>
+              <pre className="bg-slate-900 text-slate-100 p-6 rounded-xl text-sm overflow-auto font-mono shadow-inner max-h-96">
+                {JSON.stringify(snapshot.payload, null, 2)}
+              </pre>
+            </div>
           )}
         </div>
       </div>

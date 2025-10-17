@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { handleLandingPageSync } from './landingPageReceiver';
 
 export async function executeSyncJob(jobId: string, organizationId: string) {
   try {
@@ -62,28 +63,31 @@ async function syncSite(jobId: string, site: any) {
     const signature = await generateSignature(landingPageContent, site.destination_secret);
 
     // Determine campaign type from site slug
-    const campaign = site.slug; // facebook, google, or instagram
+    const campaign = site.slug as 'facebook' | 'google' | 'instagram';
 
-    // Send to landing page receiver endpoint
-    const receiverUrl = `${window.location.origin}/api/landing-receiver`;
-
-    const response = await fetch(receiverUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        payload: landingPageContent,
-        signature: signature,
-        campaign: campaign,
-      }),
+    // Use client-side receiver (for demo purposes)
+    // In production, this would POST to an actual API endpoint
+    const result = await handleLandingPageSync({
+      payload: landingPageContent,
+      signature: signature,
+      campaign: campaign,
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to sync to landing page');
     }
 
-    const result = await response.json();
+    // Store snapshot in destination_snapshots table
+    await supabase
+      .from('destination_snapshots')
+      .upsert({
+        site_id: site.id,
+        payload: landingPageContent,
+        received_at: new Date().toISOString(),
+        item_count: payload.items.length,
+      }, {
+        onConflict: 'site_id'
+      });
 
     await supabase
       .from('sites')
@@ -93,7 +97,10 @@ async function syncSite(jobId: string, site: any) {
       })
       .eq('id', site.id);
 
-    await addLog(jobId, 'info', `Successfully synced to ${site.name}`, site.id, null, result);
+    await addLog(jobId, 'info', `Successfully synced to ${site.name}`, site.id, null, {
+      ...result,
+      itemCount: payload.items.length
+    });
 
     return { success: true, siteId: site.id };
   } catch (error: any) {

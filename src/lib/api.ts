@@ -232,3 +232,37 @@ export async function generateSecret(length = 32): Promise<string> {
   crypto.getRandomValues(array);
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
+
+/**
+ * Subscribe to live job logs via Server-Sent Events (SSE)
+ * Returns a cleanup function to close the connection
+ */
+export function subscribeToJobLogs(jobId: string, onLog: (log: any) => void, onError?: (error: Error) => void) {
+  // For now, use Supabase Realtime to subscribe to new logs
+  const channel = supabase
+    .channel(`job-logs-${jobId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'job_logs',
+        filter: `job_id=eq.${jobId}`
+      },
+      (payload) => {
+        onLog(payload.new);
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log(`Subscribed to live logs for job ${jobId}`);
+      } else if (status === 'CHANNEL_ERROR') {
+        onError?.(new Error('Failed to subscribe to job logs'));
+      }
+    });
+
+  // Return cleanup function
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}

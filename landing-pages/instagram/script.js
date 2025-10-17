@@ -2,14 +2,15 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Fetch the synced data
-        const response = await fetch('data.json');
+        // Get synced data from localStorage
+        const storageKey = 'landing_page_data_instagram';
+        const storedData = localStorage.getItem(storageKey);
 
-        if (!response.ok) {
+        if (!storedData) {
             throw new Error('No synced data available');
         }
 
-        const data = await response.json();
+        const data = JSON.parse(storedData);
 
         // Populate hero section
         if (data.hero_headline) {
