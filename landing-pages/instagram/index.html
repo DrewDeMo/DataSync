@@ -7,87 +7,284 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Sync Status Badge -->
-        <div class="sync-badge">
-            <span class="sync-icon">🔄</span>
-            <span id="sync-status">Loading...</span>
+    <!-- Floating Header -->
+    <header class="floating-header">
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-icon">🏢</span>
+                <span class="logo-text" id="company-name">Premium Services</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#about">About</a>
+                <a href="#offers">Offers</a>
+                <a href="#reviews">Reviews</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <a href="#" id="header-cta" class="header-cta-button">Get Started</a>
+        </div>
+    </header>
+
+    <!-- Sync Status Badge -->
+    <div class="sync-badge">
+        <span class="sync-icon">🔄</span>
+        <span id="sync-status">Loading...</span>
+    </div>
+
+    <!-- Hero Slideshow Section -->
+    <section class="hero-slideshow">
+        <div class="slideshow-container">
+            <div class="slide active">
+                <div class="slide-content">
+                    <h1 id="hero-headline">Loading...</h1>
+                    <p id="hero-subheadline">Please wait while we load the content...</p>
+                    <a href="#" id="cta-button" class="cta-button">Loading...</a>
+                </div>
+            </div>
+            <div class="slide">
+                <div class="slide-content">
+                    <h1>Experience Excellence</h1>
+                    <p>Discover what makes us different from the rest</p>
+                    <a href="#offers" class="cta-button">View Offers</a>
+                </div>
+            </div>
+            <div class="slide">
+                <div class="slide-content">
+                    <h1>Join Thousands of Happy Customers</h1>
+                    <p>See why people choose us every day</p>
+                    <a href="#reviews" class="cta-button">Read Reviews</a>
+                </div>
+            </div>
+        </div>
+        <div class="slideshow-dots">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+        </div>
+    </section>
+
+    <!-- Company Blurb Section -->
+    <section class="company-blurb" id="about">
+        <div class="blurb-container">
+            <h2>About Our Company</h2>
+            <p class="blurb-text">
+                We are a leading provider of premium services dedicated to delivering exceptional value to our customers. 
+                With years of experience and a commitment to excellence, we've built a reputation for quality, reliability, 
+                and customer satisfaction. Our team of experts works tirelessly to ensure that every interaction exceeds 
+                your expectations.
+            </p>
+            <div class="blurb-features">
+                <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <h3>Quality Guaranteed</h3>
+                    <p>We stand behind every service we provide</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <h3>Expert Team</h3>
+                    <p>Experienced professionals at your service</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <h3>Customer First</h3>
+                    <p>Your satisfaction is our top priority</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offers Section -->
+    <section class="offers-section" id="offers">
+        <div class="offers-container">
+            <h2>Current Offers</h2>
+            <p class="offers-subtitle">Take advantage of our exclusive deals</p>
+            
+            <div class="offers-grid">
+                <!-- Primary Offer (from CMS) -->
+                <div class="offer-card primary" id="offer-section">
+                    <div class="offer-badge">Special Offer</div>
+                    <h3 id="offer-title">Loading...</h3>
+                    <p id="offer-description">Loading...</p>
+                    <p class="offer-expires" id="offer-expires"></p>
+                    <a href="#" class="offer-cta">Claim Offer</a>
+                </div>
+
+                <!-- Additional Static Offers -->
+                <div class="offer-card">
+                    <div class="offer-badge secondary">Limited Time</div>
+                    <h3>New Customer Discount</h3>
+                    <p>Get 20% off your first purchase when you sign up today</p>
+                    <a href="#" class="offer-cta">Learn More</a>
+                </div>
+
+                <div class="offer-card">
+                    <div class="offer-badge secondary">Exclusive</div>
+                    <h3>Referral Bonus</h3>
+                    <p>Refer a friend and both receive special rewards</p>
+                    <a href="#" class="offer-cta">Refer Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section" id="reviews">
+        <div class="reviews-container">
+            <h2>What Our Customers Say</h2>
+            <p class="reviews-subtitle">Real experiences from real people</p>
+            
+            <div class="reviews-grid">
+                <div class="review-card" id="testimonial-section">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text" id="testimonial-text">"Loading..."</p>
+                    <p class="review-author" id="testimonial-author">- Loading...</p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Outstanding service! The team went above and beyond to ensure everything was perfect. Highly recommend!"</p>
+                    <p class="review-author">- Sarah M.</p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Best decision I made this year. Professional, efficient, and the results speak for themselves."</p>
+                    <p class="review-author">- Michael R.</p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Exceptional quality and customer service. They truly care about their customers and it shows."</p>
+                    <p class="review-author">- Jennifer L.</p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"I've tried others, but nothing compares. This is the real deal. Worth every penny!"</p>
+                    <p class="review-author">- David K.</p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Fast, reliable, and professional. Couldn't ask for more. Will definitely be back!"</p>
+                    <p class="review-author">- Amanda T.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photo Gallery Section -->
+    <section class="gallery-section" id="gallery">
+        <div class="gallery-container">
+            <h2>Gallery</h2>
+            <p class="gallery-subtitle">See our work in action</p>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Professional Service</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Quality Results</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Happy Customers</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Expert Team</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Modern Facilities</p>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-placeholder">📷</div>
+                    <p>Attention to Detail</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer with Address -->
+    <footer class="main-footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <div class="footer-contact">
+                    <p class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <span id="location-address">Loading...</span>
+                    </p>
+                    <p class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <span id="location-city">Loading...</span>
+                    </p>
+                    <p class="contact-item">
+                        <span class="contact-icon">📞</span>
+                        <span id="phone">Loading...</span>
+                    </p>
+                    <p class="contact-item">
+                        <span class="contact-icon">🕒</span>
+                        <span id="location-hours">Loading...</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#offers">Current Offers</a></li>
+                    <li><a href="#reviews">Customer Reviews</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#" class="social-icon">📘 Facebook</a>
+                    <a href="#" class="social-icon">📷 Instagram</a>
+                    <a href="#" class="social-icon">🐦 Twitter</a>
+                </div>
+            </div>
         </div>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1 id="hero-headline">Loading...</h1>
-                <p id="hero-subheadline">Please wait while we load the content...</p>
-                <a href="#" id="cta-button" class="cta-button">Loading...</a>
-            </div>
-        </section>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Premium Services. All rights reserved.</p>
+            <p class="campaign-source">Campaign Source: <strong>Instagram</strong></p>
+        </div>
+    </footer>
 
-        <!-- Current Offer Section -->
-        <section class="offer" id="offer-section">
-            <div class="offer-content">
-                <div class="offer-badge">🎉 Exclusive Offer</div>
-                <h2 id="offer-title">Loading...</h2>
-                <p id="offer-description">Loading...</p>
-                <p class="offer-expires" id="offer-expires"></p>
+    <!-- Fine Print and Privacy Policy -->
+    <section class="legal-section">
+        <div class="legal-container">
+            <div class="legal-content">
+                <h4>Fine Print</h4>
+                <p class="fine-print">
+                    *Offers subject to availability and may be modified or discontinued at any time without notice. 
+                    Terms and conditions apply. Prices and promotions are valid for a limited time only. 
+                    Not valid with other offers or discounts. See store for complete details. 
+                    Individual results may vary. All testimonials are from real customers but may not reflect typical results.
+                </p>
             </div>
-        </section>
-
-        <!-- Location Info Section -->
-        <section class="location">
-            <h2>📍 Find Us</h2>
-            <div class="location-grid">
-                <div class="location-item">
-                    <div class="location-icon-wrapper">
-                        <span class="location-icon">📍</span>
-                    </div>
-                    <div class="location-details">
-                        <h3>Location</h3>
-                        <p id="location-address">Loading...</p>
-                        <p id="location-city">Loading...</p>
-                    </div>
-                </div>
-                <div class="location-item">
-                    <div class="location-icon-wrapper">
-                        <span class="location-icon">🕒</span>
-                    </div>
-                    <div class="location-details">
-                        <h3>Hours</h3>
-                        <p id="location-hours">Loading...</p>
-                    </div>
-                </div>
-                <div class="location-item">
-                    <div class="location-icon-wrapper">
-                        <span class="location-icon">📞</span>
-                    </div>
-                    <div class="location-details">
-                        <h3>Contact</h3>
-                        <p id="phone">Loading...</p>
-                    </div>
-                </div>
+            
+            <div class="legal-links">
+                <a href="#" class="legal-link">Privacy Policy</a>
+                <span class="separator">|</span>
+                <a href="#" class="legal-link">Terms of Service</a>
+                <span class="separator">|</span>
+                <a href="#" class="legal-link">Cookie Policy</a>
+                <span class="separator">|</span>
+                <a href="#" class="legal-link">Accessibility</a>
             </div>
-        </section>
-
-        <!-- Testimonial Section -->
-        <section class="testimonial" id="testimonial-section">
-            <div class="testimonial-card">
-                <div class="testimonial-header">
-                    <div class="testimonial-avatar">💬</div>
-                    <div class="testimonial-meta">
-                        <p class="testimonial-author" id="testimonial-author">Loading...</p>
-                        <p class="testimonial-verified">Verified Customer</p>
-                    </div>
-                </div>
-                <p class="testimonial-text" id="testimonial-text">Loading...</p>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>Powered by DataSync Campaign Manager</p>
-            <p class="campaign-source">Campaign: <strong>Instagram</strong></p>
-        </footer>
-    </div>
+            
+            <p class="powered-by">Powered by DataSync Campaign Manager</p>
+        </div>
+    </section>
 
     <script src="script.js"></script>
 </body>

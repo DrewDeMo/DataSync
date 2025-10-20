@@ -1,6 +1,56 @@
 // Instagram Campaign Landing Page - Dynamic Content Loader
 
+// Slideshow functionality
+let slideIndex = 1;
+let slideTimer;
+
+function showSlides(n) {
+    const slides = document.getElementsByClassName('slide');
+    const dots = document.getElementsByClassName('dot');
+
+    if (n > slides.length) { slideIndex = 1 }
+    if (n < 1) { slideIndex = slides.length }
+
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].classList.remove('active');
+    }
+
+    for (let i = 0; i < dots.length; i++) {
+        dots[i].classList.remove('active');
+    }
+
+    if (slides[slideIndex - 1]) {
+        slides[slideIndex - 1].classList.add('active');
+    }
+    if (dots[slideIndex - 1]) {
+        dots[slideIndex - 1].classList.add('active');
+    }
+}
+
+function currentSlide(n) {
+    clearTimeout(slideTimer);
+    slideIndex = n;
+    showSlides(slideIndex);
+    autoSlide();
+}
+
+function nextSlide() {
+    slideIndex++;
+    showSlides(slideIndex);
+}
+
+function autoSlide() {
+    slideTimer = setTimeout(() => {
+        nextSlide();
+        autoSlide();
+    }, 5000); // Change slide every 5 seconds
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize slideshow
+    showSlides(slideIndex);
+    autoSlide();
+
     try {
         // Get synced data from localStorage
         const storageKey = 'landing_page_data_instagram';
@@ -12,6 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const data = JSON.parse(storedData);
 
+        // Populate company name in header
+        if (data.company_name) {
+            document.getElementById('company-name').textContent = data.company_name;
+        }
+
         // Populate hero section
         if (data.hero_headline) {
             document.getElementById('hero-headline').textContent = data.hero_headline;
@@ -21,15 +76,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('hero-subheadline').textContent = data.hero_subheadline;
         }
 
-        // Populate CTA button (support both cta_text and cta_primary)
+        // Populate CTA buttons (support both cta_text and cta_primary)
         const ctaText = data.cta_text || data.cta_primary;
         if (ctaText) {
             const ctaButton = document.getElementById('cta-button');
-            ctaButton.textContent = ctaText;
+            const headerCtaButton = document.getElementById('header-cta');
 
-            const ctaUrl = data.cta_url || data.cta_link;
-            if (ctaUrl) {
-                ctaButton.href = ctaUrl;
+            if (ctaButton) {
+                ctaButton.textContent = ctaText;
+                const ctaUrl = data.cta_url || data.cta_link;
+                if (ctaUrl) {
+                    ctaButton.href = ctaUrl;
+                }
+            }
+
+            if (headerCtaButton) {
+                headerCtaButton.textContent = ctaText;
+                const ctaUrl = data.cta_url || data.cta_link;
+                if (ctaUrl) {
+                    headerCtaButton.href = ctaUrl;
+                }
             }
         }
 
