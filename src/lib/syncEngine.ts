@@ -183,18 +183,18 @@ async function buildPayload(mappings: any[]) {
 
 /**
  * Merge multiple content items into a single landing page content object
- * Takes the first item's data as the base and merges in additional items
+ * Merges all items' data together, with later items overriding earlier ones
  */
 function mergeLandingPageContent(items: any[]) {
   if (items.length === 0) {
     return {};
   }
 
-  // Start with the first item as the base
-  const merged = { ...items[0].data };
-
-  // For landing pages, we typically want to use the first item's content
-  // but this could be extended to merge multiple items if needed
+  // Merge all items together
+  // Later items will override earlier items for conflicting keys
+  const merged = items.reduce((acc, item) => {
+    return { ...acc, ...item.data };
+  }, {});
 
   return merged;
 }

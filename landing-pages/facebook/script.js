@@ -21,13 +21,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('hero-subheadline').textContent = data.hero_subheadline;
         }
 
-        // Populate CTA button
-        if (data.cta_text) {
+        // Populate CTA button (support both cta_text and cta_primary)
+        const ctaText = data.cta_text || data.cta_primary;
+        if (ctaText) {
             const ctaButton = document.getElementById('cta-button');
-            ctaButton.textContent = data.cta_text;
+            ctaButton.textContent = ctaText;
 
-            if (data.cta_url) {
-                ctaButton.href = data.cta_url;
+            const ctaUrl = data.cta_url || data.cta_link;
+            if (ctaUrl) {
+                ctaButton.href = ctaUrl;
             }
         }
 
@@ -35,16 +37,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         const offerSection = document.getElementById('offer-section');
         if (data.offer_title && data.offer_description) {
             document.getElementById('offer-title').textContent = data.offer_title;
-            document.getElementById('offer-description').textContent = data.offer_description;
 
-            if (data.offer_expires) {
-                const expiresDate = new Date(data.offer_expires);
+            // Handle markdown in offer description
+            const offerDesc = document.getElementById('offer-description');
+            if (data.offer_description.includes('**') || data.offer_description.includes('*')) {
+                // Simple markdown to HTML conversion
+                let html = data.offer_description
+                    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+                offerDesc.innerHTML = html;
+            } else {
+                offerDesc.textContent = data.offer_description;
+            }
+
+            // Support both offer_expires and valid_until fields
+            const expiresDate = data.offer_expires || data.valid_until;
+            if (expiresDate) {
+                const date = new Date(expiresDate);
                 document.getElementById('offer-expires').textContent =
-                    `Expires: ${expiresDate.toLocaleDateString('en-US', {
+                    `Expires: ${date.toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
                     })}`;
+            }
+
+            // Show discount amount if available
+            if (data.discount_amount) {
+                const offerBadge = offerSection.querySelector('.offer-badge');
+                offerBadge.textContent = data.discount_amount;
             }
         } else {
             offerSection.classList.add('hidden');
@@ -69,8 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Populate testimonial (if available)
         const testimonialSection = document.getElementById('testimonial-section');
-        if (data.testimonial_text && data.testimonial_author) {
-            document.getElementById('testimonial-text').textContent = `"${data.testimonial_text}"`;
+        const testimonialText = data.testimonial_text || data.testimonial;
+        if (testimonialText && data.testimonial_author) {
+            document.getElementById('testimonial-text').textContent = `"${testimonialText}"`;
             document.getElementById('testimonial-author').textContent = `- ${data.testimonial_author}`;
         } else {
             testimonialSection.classList.add('hidden');
